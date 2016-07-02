@@ -1,4 +1,4 @@
 {
-    "registry": "git://data.shanknet.local/usr/local/git/bower/request/",
+    "registry": "http://web.shanknet.local:5678/bower-repo",
     "timeout": 300000
 }
