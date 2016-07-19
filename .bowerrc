@@ -1,4 +1,4 @@
 {
-    "registry": "http://web.shanknet.local:5678/bower-repo",
+    "registry": "http://web.shanknet.local:5678/",
     "timeout": 300000
 }

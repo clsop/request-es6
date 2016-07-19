@@ -1,26 +1,25 @@
 {
-  "name": "request",
-  "description": "simple object wrapper around XmlHttpRequest, for async js request or Ajax",
+  "name": "request-es6",
+  "description": "simple class wrapper around XmlHttpRequest, for async js request or Ajax",
   "main": [
     "request.js"
   ],
   "moduleType": [
     "amd"
   ],
-  "devDependencies": {
-    "mocha": "^2.5.3"
-  },
   "keywords": [
     "async",
     "ajax",
-    "request"
+    "request",
+    "es6"
   ],
   "authors": [
     "Claus Petersen <clayzzz@hotmail.dk>"
   ],
   "license": "MIT",
   "ignore": [
-    "bower_components"
+    "bower_components",
+    "node_modules"
   ],
   "private": false
 }
