@@ -1,14 +1,16 @@
 'use strict';
 
 export default class Reponse {
-	constructor(status, statusText, responseText = null) {
-		if ((!status || !statusText) && !(status instanceof Number)) {
+	constructor(status = null, statusText = '', responseType = '', responseText = '', responseData = null) {
+		if (status === null && !(typeof status === 'number')) {
 			throw new TypeError('status must be an unsigned short');
 		}
 
 		this.status = status;
 		this.statusText = statusText;
 		this.responseText = responseText;
+		this.responseType = responseType;
+		this.responseData = responseData;
 	}
 
 	setHeaders(headers) {
@@ -29,5 +31,13 @@ export default class Reponse {
 
 	getResponseText() {
 		return this.responseText;
+	}
+
+	getResponseType() {
+		return this.responseType;
+	}
+
+	getResponseData() {
+		return this.responseData;
 	}
 }

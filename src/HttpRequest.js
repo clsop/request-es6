@@ -1,94 +1,103 @@
 'use strict';
 
-import SuccessResponse from './SuccessResponse';
+import ResponseHandler from './ResponseHandler';
+import SuccessResponse from './Response';
 import FailResponse from './FailResponse';
 import HttpRequestError from './exceptions/HttpRequestError';
 import InvalidFunctionError from './exceptions/InvalidFunctionError';
 
 export default class HttpRequest {
-	constructor(url = null, eagerness, username = null, password = null) {
-		let xhr = new XMLHttpRequest();
+    constructor(url = null, eagerness, username = null, password = null) {
+        let xhr = new XMLHttpRequest();
 
-		this.url = url;
-		this.username = username;
-		this.password = password;
-		this.methods = new Set(['GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'OPTION']);
+        this.url = url;
+        this.username = username;
+        this.password = password;
+        this.methods = new Set(['GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'OPTION']);
+        this.promise = new Promise((resolve, reject) => {
+            xhr.addEventListener('load', e => {
+                let xhr = e.target;
+                let responseHandler = new ResponseHandler(xhr, 0);
 
-		this.promise = new Promise((resolve, reject) => {
-			xhr.addEventListener('load', e => {
-				let xhr = e.target;
-				let response = new Success(xhr.status, xhr.statusText, xhr.responseType, xhr.responseText, xhr.response);
-				response.setHeaders(xhr.getAllResponseHeaders());
-				
-				resolve(response);
-			});
-			let failed = e => {
-				let xhr = e.target;
-				let response = new Fail(xhr.status, xhr.statusText, xhr.responseText);
-				response.setHeaders(xhr.getAllResponseHeaders());
-				
-				reject(response);
-			};
+                resolve(responseHandler.getResponse());
+            });
 
-			xhr.addEventListener('error', failed);
-			xhr.addEventListener('abort', failed);
-		});
+            let failed = e => {
+                let xhr = e.target;
+                let responseHandler = new ResponseHandler(xhr, 1);
 
-		this.headers = new Map();
-		this.xhr = xhr;
-		this.setPatience(eagerness);
-	}
+                reject(responseHandler.getResponse());
+            };
 
-	setPatience(eagerness) {
-		switch (eagerness) {
-			case 'now': this.xhr.timeout = 100; break;
-			case 'hurry': this.xhr.timeout = 500; break;
-			case 'no_hurry': this.xhr.timeout = 2000; break;
-			case 'patient': this.xhr.timeout = 10000; break;
-			case 'real_patient': this.xhr.timeout = 30000; break;
-			default: this.xhr.timeout = 0; break; // whenever
-		}
-	}
+            xhr.addEventListener('error', failed);
+            xhr.addEventListener('abort', failed);
+        });
 
-	setUrl(url) {
-		this.url = url;
-	}
+        this.headers = new Map();
+        this.xhr = xhr;
+        this.setPatience(eagerness);
+    }
 
-	setHeader(header, value) {
-		this.headers.set(header, value);
-	}
+    setPatience(eagerness) {
+        switch (eagerness) {
+            case 'now':
+                this.xhr.timeout = 100;
+                break;
+            case 'hurry':
+                this.xhr.timeout = 500;
+                break;
+            case 'no_hurry':
+                this.xhr.timeout = 2000;
+                break;
+            case 'patient':
+                this.xhr.timeout = 10000;
+                break;
+            case 'real_patient':
+                this.xhr.timeout = 30000;
+                break;
+            default:
+                this.xhr.timeout = 0;
+                break; // whenever
+        }
+    }
 
-	setProgressHandler(callback = null) {
-		if (callback === null || typeof callback !== 'function') {
-			throw new InvalidFunctionError('callback must be a function');
-		}
+    setUrl(url) {
+        this.url = url;
+    }
 
-		this.xhr.addEventListener('progress', callback);
-	}
+    setHeader(header, value) {
+        // TODO: check for header in map to throw accurate exception
+        this.headers.set(header, value);
+    }
 
-	then(callback = null) {
-		if (callback === null || typeof callback !== 'function') {
-			throw new InvalidFunctionError('callback must be a function');
-		}
+    setProgressHandler(callback = null) {
+        if (callback === null || typeof callback !== 'function' || callback.length !== 1) {
+            throw new InvalidFunctionError('argument must be a function with one parameter');
+        }
 
-		return this.promise.then(callback);
-	}
+        this.xhr.addEventListener('progress', callback);
+    }
 
-	send(method = 'GET', data = null) {
-		if (this.url === null) {
-			throw new HttpRequestError('no url to send request');
-		}
+    then(successCallback = null, failCallback = null) {
+        if (successCallback === null || typeof successCallback !== 'function') {
+            throw new InvalidFunctionError('callback must be a function');
+        }
 
-		// always async
-		this.xhr.open(typeof method === 'string' && this.methods.has(method) ? method : 'GET', this.url, true, this.username, this.password);
+        return this.promise.then(successCallback, failCallback);
+    }
 
-		this.headers.forEach((val, key) => {
-			this.xhr.setRequestHeader(key, val);
-		});
+    send(method = 'GET', data = null) {
+        if (this.url === null) {
+            throw new HttpRequestError('no url to send request');
+        }
 
-		if (data !== null)
-			this.xhr.send(data);
-		else
-			this.xhr.send();
-	}
+        // always async
+        this.xhr.open(typeof method === 'string' && this.methods.has(method) ? method : 'GET', this.url, true, this.username, this.password);
+        this.headers.forEach((val, key) => {
+            this.xhr.setRequestHeader(key, val);
+        });
+        
+        if (data !== null) this.xhr.send(data);
+        else this.xhr.send();
+    }
 }

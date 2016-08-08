@@ -5,9 +5,49 @@ const source = require('vinyl-source-stream');
 const buffer = require('vinyl-buffer');
 const mocha = require('gulp-mocha');
 
+const reporter = 'nyan';
+const testBuild = 'build/test';
+const distBuild = 'build/dist';
+
+gulp.task('default', ['dist:amd', 'dist:commonjs']);
+
+gulp.task('dist:amd', () => {
+    var b = browserify({
+        entries: ['src/Response.js', 'src/FailResponse.js', 'src/HttpRequest.js',
+            'src/exceptions/InvalidFunctionError.js', 'src/exceptions/HttpResponseError.js', 'src/exceptions/HttpRequestError.js'],
+        debug: false
+    });
+
+    return b.transform(babelify, {
+        presets: ['es2015'],
+        plugins: ['transform-es2015-modules-amd']
+    })
+    .bundle()
+    .on("error", (err) => { console.log("Error : " + err.message); })
+    .pipe(source('request_amd.js'))
+    .pipe(buffer())
+    .pipe(gulp.dest(distBuild));
+});
+
+gulp.task('dist:commonjs', () => {
+    var b = browserify({
+        entries: 'src/HttpRequest.js',
+        debug: false
+    });
+
+    return b.transform(babelify, {
+        presets: ['es2015']
+    })
+    .bundle()
+    .on("error", (err) => { console.log("Error : " + err.message); })
+    .pipe(source('request_commonjs.js'))
+    .pipe(buffer())
+    .pipe(gulp.dest(distBuild));
+});
+
 gulp.task('build-tests', () => {
     var b = browserify({
-        entries: ['test/spec/object.js', 'test/spec/success.js', 'test/spec/fails.js'],
+        entries: ['test/object.js', 'test/success.js', 'test/fails.js', 'test/commons.js'],
         debug: true
     });
 
@@ -18,12 +58,12 @@ gulp.task('build-tests', () => {
     .on("error", (err) => { console.log("Error : " + err.message); })
     .pipe(source('tests.js'))
     .pipe(buffer())
-    .pipe(gulp.dest('test'));
+    .pipe(gulp.dest(testBuild));
 });
 
 gulp.task('build-success-tests', () => {
     var b = browserify({
-        entries: 'test/spec/success.js',
+        entries: 'test/success.js',
         debug: true
     });
 
@@ -34,12 +74,12 @@ gulp.task('build-success-tests', () => {
     .on("error", (err) => { console.log("Error : " + err.message); })
     .pipe(source('success.js'))
     .pipe(buffer())
-    .pipe(gulp.dest('test'));
+    .pipe(gulp.dest(testBuild));
 });
 
 gulp.task('build-fail-tests', () => {
     var b = browserify({
-        entries: 'test/spec/fails.js',
+        entries: 'test/fails.js',
         debug: true
     });
 
@@ -50,12 +90,12 @@ gulp.task('build-fail-tests', () => {
     .on("error", (err) => { console.log("Error : " + err.message); })
     .pipe(source('fails.js'))
     .pipe(buffer())
-    .pipe(gulp.dest('test'));
+    .pipe(gulp.dest(testBuild));
 });
 
 gulp.task('build-object-tests', () => {
     var b = browserify({
-        entries: 'test/spec/object.js',
+        entries: 'test/object.js',
         debug: true
     });
 
@@ -66,40 +106,65 @@ gulp.task('build-object-tests', () => {
     .on("error", (err) => { console.log("Error : " + err.message); })
     .pipe(source('object.js'))
     .pipe(buffer())
-    .pipe(gulp.dest('test'));
+    .pipe(gulp.dest(testBuild));
+});
+
+gulp.task('build-commons-tests', () => {
+    var b = browserify({
+        entries: 'test/commons.js',
+        debug: true
+    });
+
+    return b.transform(babelify, {
+        presets: ['es2015']
+    })
+    .bundle()
+    .on("error", (err) => { console.log("Error : " + err.message); })
+    .pipe(source('commons.js'))
+    .pipe(buffer())
+    .pipe(gulp.dest(testBuild));
 });
 
 gulp.task('tests', ['build-tests'], () => {
-	return gulp.src('test/tests.js', { read: false })
+	return gulp.src(testBuild + '/tests.js', { read: false })
 		.pipe(mocha({
-			reporter: 'nyan',
+			reporter: reporter,
 			ui: 'tdd',
 			bail: true
 		}));
 });
 
-gulp.task('success-tests', ['build-success-tests'], () => {
-    return gulp.src('test/success.js', { read: false })
+gulp.task('tests:success', ['build-success-tests'], () => {
+    return gulp.src(testBuild + '/success.js', { read: false })
         .pipe(mocha({
-            reporter: 'nyan',
+            reporter: reporter,
             ui: 'tdd',
             bail: true
         }));
 });
 
-gulp.task('fail-tests', ['build-fail-tests'], () => {
-    return gulp.src('test/fails.js', { read: false })
+gulp.task('tests:fail', ['build-fail-tests'], () => {
+    return gulp.src(testBuild + '/fails.js', { read: false })
         .pipe(mocha({
-            reporter: 'nyan',
+            reporter: reporter,
             ui: 'tdd',
             bail: true
         }));
 });
 
-gulp.task('object-tests', ['build-object-tests'], () => {
-    return gulp.src('test/object.js', { read: false })
+gulp.task('tests:object', ['build-object-tests'], () => {
+    return gulp.src(testBuild + '/object.js', { read: false })
         .pipe(mocha({
-            reporter: 'nyan',
+            reporter: reporter,
+            ui: 'tdd',
+            bail: true
+        }));
+});
+
+gulp.task('tests:common', ['build-commons-tests'], () => {
+    return gulp.src(testBuild + '/commons.js', { read: false })
+        .pipe(mocha({
+            reporter: reporter,
             ui: 'tdd',
             bail: true
         }));
