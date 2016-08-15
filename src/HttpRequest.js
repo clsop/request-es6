@@ -1,21 +1,23 @@
 'use strict';
 
+import ErrorMessage from './Errors';
 import ResponseHandler from './ResponseHandler';
 import SuccessResponse from './Response';
 import FailResponse from './FailResponse';
 import HttpRequestError from './exceptions/HttpRequestError';
 import InvalidFunctionError from './exceptions/InvalidFunctionError';
 
-const eventHook = (promiseType, resolve, reject) => {
+const eventHook = (promiseType, resolver) => {
     return e => {
         let xhr = e.target;
-        let responseHandler = new ResponseHandler(xhr, promiseType);
+        let responseHandler = new ResponseHandler(xhr);
 
-        switch (promiseType) {
-            case 0: resolve(responseHandler.isValidResponse() ? responseHandler.getResponse() : null); break;
-            case 0: reject(responseHandler.isValidResponse() ? responseHandler.getResponse() : null); break;
-        }
+        resolver(responseHandler.isValidResponse() ? responseHandler.getResponse(promiseType) : null);
     };
+};
+
+const validUrl = (url) => {
+    return /^(http|https):\/\/(?:w{3}\.)?.+(?:\.).+/.test(url);
 };
 
 export class HttpRequest {
@@ -28,9 +30,9 @@ export class HttpRequest {
         this.password = password;
         this.methods = new Set(['GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'OPTION']);
         this.promise = new Promise((resolve, reject) => {
-            let failed = eventHook(1, resolve, reject);
+            let failed = eventHook(1, reject);
 
-            xhr.addEventListener('load', eventHook(0, resolve, reject));
+            xhr.addEventListener('load', eventHook(0, resolve));
             xhr.addEventListener('error', failed);
             xhr.addEventListener('abort', failed);
         });
@@ -64,12 +66,16 @@ export class HttpRequest {
     }
 
     setUrl(url) {
+        if (!validUrl(url)) {
+            throw new HttpRequestError(ErrorMessage.VALID_URL);
+        }
+
         this.url = url;
     }
 
     setHeader(header, value) {
         if (this.headers.has(header)) {
-            throw new HttpRequestError('header is already defined');
+            throw new HttpRequestError(ErrorMessage.HEADER_DEFINED);
         }
 
         this.headers.set(header, value);
@@ -81,7 +87,7 @@ export class HttpRequest {
 
     setProgressHandler(callback = null) {
         if (callback === null || typeof callback !== 'function' || callback.length !== 1) {
-            throw new InvalidFunctionError('argument must be a function with one parameter');
+            throw new InvalidFunctionError(ErrorMessage.FUNCTION_MISSING_PARAM);
         }
 
         this.xhr.addEventListener('progress', callback);
@@ -89,7 +95,7 @@ export class HttpRequest {
 
     then(successCallback = null) {
         if (successCallback === null || typeof successCallback !== 'function') {
-            throw new InvalidFunctionError('callback must be a function');
+            throw new InvalidFunctionError(ErrorMessage.FUNCTION_CALLBACK);
         }
 
         return this.promise.then(successCallback);
@@ -97,7 +103,7 @@ export class HttpRequest {
 
     catch (failCallback = null) {
         if (failCallback === null || typeof failCallback !== 'function') {
-            throw new InvalidFunctionError('callback must be a function');
+            throw new InvalidFunctionError(ErrorMessage.FUNCTION_CALLBACK);
         }
 
         return this.promise.catch(failCallback);
@@ -108,8 +114,8 @@ export class HttpRequest {
     }
 
     send(method = 'GET', data = null) {
-        if (this.url === null) {
-            throw new HttpRequestError('no url to send request');
+        if (!validUrl(this.url)) {
+            throw new HttpRequestError(ErrorMessage.VALID_URL);
         }
 
         // always async
@@ -125,7 +131,7 @@ export class HttpRequest {
 }
 
 // browser env
-if (!global && window) {
+if (global.window) {
     let descriptor = Object.create(null);
     Object.defineProperties(descriptor, {
         value: {

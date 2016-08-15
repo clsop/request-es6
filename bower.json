@@ -1,8 +1,8 @@
 {
   "name": "request-es6",
-  "description": "simple class wrapper around XmlHttpRequest, for async js request or Ajax",
+  "description": "simple async wrapper around XmlHttpRequest, for Ajax requests",
   "main": [
-    "request.js"
+    "request-es6.js"
   ],
   "moduleType": [
     "globals",

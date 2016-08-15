@@ -9,6 +9,7 @@ const pump = require('pump');
 const mocha = require('gulp-mocha');
 
 const reporter = 'nyan';
+const bailOnFirstFail = false;
 
 const distBuild = 'build/dist';
 const debugBuild = 'build/debug';
@@ -20,7 +21,7 @@ gulp.task('default', ['dist', 'debug']);
 /* distribution */
 /****************/
 gulp.task('dist', (cb) => {
-    var b = browserify({
+    let b = browserify({
         entries: 'src/HttpRequest.js',
         debug: false
     });
@@ -37,7 +38,7 @@ gulp.task('dist', (cb) => {
 });
 
 gulp.task('debug', (cb) => {
-    var b = browserify({
+    let b = browserify({
         entries: 'src/HttpRequest.js',
         debug: true
     });
@@ -65,7 +66,7 @@ gulp.task('debug', (cb) => {
 /* build tests */
 /***************/
 gulp.task('build-tests', (cb) => {
-    var b = browserify({
+    let b = browserify({
         entries: ['test/object.js', 'test/common.js', 'test/success.js', 'test/fail.js'],
         debug: true
     });
@@ -81,7 +82,7 @@ gulp.task('build-tests', (cb) => {
 });
 
 gulp.task('build-success-tests', (cb) => {
-    var b = browserify({
+    let b = browserify({
         entries: 'test/success.js',
         debug: true
     });
@@ -97,7 +98,7 @@ gulp.task('build-success-tests', (cb) => {
 });
 
 gulp.task('build-fail-tests', (cb) => {
-    var b = browserify({
+    let b = browserify({
         entries: 'test/fail.js',
         debug: true
     });
@@ -113,7 +114,7 @@ gulp.task('build-fail-tests', (cb) => {
 });
 
 gulp.task('build-object-tests', (cb) => {
-    var b = browserify({
+    let b = browserify({
         entries: 'test/object.js',
         debug: true
     });
@@ -129,7 +130,7 @@ gulp.task('build-object-tests', (cb) => {
 });
 
 gulp.task('build-common-tests', (cb) => {
-    var b = browserify({
+    let b = browserify({
         entries: 'test/common.js',
         debug: true
     });
@@ -148,56 +149,56 @@ gulp.task('build-common-tests', (cb) => {
 /* run tests */
 /*************/
 gulp.task('tests', ['build-tests'], () => {
-    return gulp.src(testBuild + '/tests.js', {
+    return gulp.src(`${testBuild}/tests.js`, {
             read: false
         })
         .pipe(mocha({
             reporter: reporter,
             ui: 'tdd',
-            bail: true
+            bail: bailOnFirstFail
         }));
 });
 
 gulp.task('tests:success', ['build-success-tests'], () => {
-    return gulp.src(testBuild + '/success.js', {
+    return gulp.src(`${testBuild}/success.js`, {
             read: false
         })
         .pipe(mocha({
             reporter: reporter,
             ui: 'tdd',
-            bail: true
+            bail: bailOnFirstFail
         }));
 });
 
 gulp.task('tests:fail', ['build-fail-tests'], () => {
-    return gulp.src(testBuild + '/fail.js', {
+    return gulp.src(`${testBuild}/fail.js`, {
             read: false
         })
         .pipe(mocha({
             reporter: reporter,
             ui: 'tdd',
-            bail: true
+            bail: bailOnFirstFail
         }));
 });
 
 gulp.task('tests:object', ['build-object-tests'], () => {
-    return gulp.src(testBuild + '/object.js', {
+    return gulp.src(`${testBuild}/object.js`, {
             read: false
         })
         .pipe(mocha({
             reporter: reporter,
             ui: 'tdd',
-            bail: true
+            bail: bailOnFirstFail
         }));
 });
 
 gulp.task('tests:common', ['build-common-tests'], () => {
-    return gulp.src(testBuild + '/common.js', {
+    return gulp.src(`${testBuild}/common.js`, {
             read: false
         })
         .pipe(mocha({
             reporter: reporter,
             ui: 'tdd',
-            bail: true
+            bail: bailOnFirstFail
         }));
 });

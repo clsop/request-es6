@@ -1,6 +1,7 @@
 import sinon from 'sinon';
 import should from 'should';
 
+import ErrorMessage from '../src/Errors';
 import {
     HttpRequest
 } from '../src/HttpRequest';
@@ -22,7 +23,8 @@ export default (() => {
         });
 
         setup(() => {
-            req = new HttpRequest(null, 'now');
+            req = new HttpRequest();
+            req.setPatience('now');
         });
 
         suite('setPatience method', () => {
@@ -38,20 +40,18 @@ export default (() => {
         });
 
         suite('setProgressHandler method', () => {
-            const error = 'argument must be a function with one parameter';
-
             test('should not throw exception when callback argument is a valid function', () => {
-                (() => req.setProgressHandler((progress) => {})).should.not.throw(error);
+                (() => req.setProgressHandler((progress) => {})).should.not.throw(ErrorMessage.FUNCTION_MISSING_PARAM);
             });
 
             test('should throw exception when callback argument is not a function', () => {
-                (() => req.setProgressHandler(42)).should.throw(error);
-                (() => req.setProgressHandler(null)).should.throw(error);
-                (() => req.setProgressHandler()).should.throw(error);
+                (() => req.setProgressHandler(42)).should.throw(ErrorMessage.FUNCTION_MISSING_PARAM);
+                (() => req.setProgressHandler(null)).should.throw(ErrorMessage.FUNCTION_MISSING_PARAM);
+                (() => req.setProgressHandler()).should.throw(ErrorMessage.FUNCTION_MISSING_PARAM);
             });
 
             test('should throw exception when callback argument does not have exactly one parameter', () => {
-                (() => req.setProgressHandler(() => {})).should.throw(error);
+                (() => req.setProgressHandler(() => {})).should.throw(ErrorMessage.FUNCTION_MISSING_PARAM);
             });
         });
 
@@ -63,41 +63,89 @@ export default (() => {
 
             test('should throw exception when header is already present', () => {
                 req.setHeader('Accept', '*');
-                (() => req.setHeader('Accept', 'application/json')).should.throw('header is already defined');
+                (() => req.setHeader('Accept', 'application/json')).should.throw(ErrorMessage.HEADER_DEFINED);
             });
         });
 
         suite('then method', () => {
-            const error = 'callback must be a function';
-
             test('should throw exception when callback argument is not a function', () => {
-                (() => req.then(42)).should.throw(error);
+                (() => req.then(42)).should.throw(ErrorMessage.FUNCTION_CALLBACK);
             });
 
             test('should not throw exception when callback is a valid function', () => {
-                (() => req.then(() => {})).should.not.throw(error);
+                (() => req.then(() => {})).should.not.throw(ErrorMessage.FUNCTION_CALLBACK);
             });
         });
 
         suite('catch method', () => {
-            const error = 'callback must be a function';
-
             test('should throw exception when callback argument is not a function', () => {
-                (() => req.catch(42)).should.throw(error);
+                (() => req.catch(42)).should.throw(ErrorMessage.FUNCTION_CALLBACK);
             });
 
             test('should not throw exception when callback argument is a valid function', () => {
-                (() => req.catch(() => {})).should.not.throw(error);
+                (() => req.catch(() => {})).should.not.throw(ErrorMessage.FUNCTION_CALLBACK);
             });
         });
 
-        suite('send method', () => {
-        	suiteSetup(() => {
-        		req = new HttpRequest();
+        suite('setUrl method', () => {
+        	test('should throw exception when non url', () => {
+        		(() => req.setUrl()).should.throw(ErrorMessage.VALID_URL);
+        		(() => req.setUrl(null)).should.throw(ErrorMessage.VALID_URL);
+        		(() => req.setUrl(undefined)).should.throw(ErrorMessage.VALID_URL);
+        		(() => req.setUrl('')).should.throw(ErrorMessage.VALID_URL);
+        		(() => req.setUrl('file://fakeRequest')).should.throw(ErrorMessage.VALID_URL);
+        		(() => req.setUrl('http://fakeRequest')).should.throw(ErrorMessage.VALID_URL);
         	});
 
+        	test('should not throw exception when valid url', () => {
+        		(() => req.setUrl('http://fakeRequest.local')).should.not.throw(ErrorMessage.VALID_URL);
+        	});
+        });
+
+        suite('send method', () => {
+        	test('should not throw exception when valid url', () => {
+                (() => {
+                	req.setUrl('http://fakeRequest.local');
+                	req.send();
+                }).should.not.throw(ErrorMessage.VALID_URL);
+                (() => {
+                	req.setUrl('http://www.fakeRequest.com');
+                	req.send();
+                }).should.not.throw(ErrorMessage.VALID_URL);
+                (() => {
+                	req.setUrl('https://www.fakeRequest.org');
+                	req.send();
+                }).should.not.throw(ErrorMessage.VALID_URL);
+            });
+
             test('should throw exception when no url', () => {
-                (() => req.send()).should.throw('no url to send request');
+            	(() => {
+            		req.setUrl();
+            		req.send();
+            	}).should.throw(ErrorMessage.VALID_URL);
+            	(() => {
+            		req.setUrl(null);
+            		req.send();
+            	}).should.throw(ErrorMessage.VALID_URL);
+            	(() => {
+            		req.setUrl(undefined);
+            		req.send();
+            	}).should.throw(ErrorMessage.VALID_URL);
+            	(() => {
+            		req.setUrl('');
+            		req.send();
+            	}).should.throw(ErrorMessage.VALID_URL);
+            });
+
+            test('should throw exception when url is not valid (non url)', () => {
+            	(() => {
+            		req.setUrl('file://fakeRequest');
+            		req.send();
+            	}).should.throw(ErrorMessage.VALID_URL);
+            	(() => {
+            		req.setUrl('http://fakeRequest');
+            		req.send();
+            	}).should.throw(ErrorMessage.VALID_URL);
             });
         });
     });

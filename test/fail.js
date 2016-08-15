@@ -1,10 +1,12 @@
 import sinon from 'sinon';
 import should from 'should';
 
-import { HttpRequest } from '../src/HttpRequest';
+import {
+    HttpRequest
+} from '../src/HttpRequest';
 
 export default (() => {
-	suite('fail request tests', () => {
+    suite('fail request tests', () => {
         let requests = [];
         let req;
 
@@ -20,13 +22,24 @@ export default (() => {
         });
 
         setup(() => {
-        	req = new HttpRequest('http://fakeRequest');
+            req = new HttpRequest('http://fakeRequest.local');
         });
 
         teardown(() => {
-        	requests = [];
+            requests = [];
         });
 
-        test('should be able to cancel a pending request');
+        test('should be able to cancel a pending request', (done) => {
+            let callback = sinon.spy();
+
+            req.catch(callback);
+            req.send();
+            req.cancel();
+
+            setTimeout(() => {
+                callback.calledWith(null).should.be.true();
+                done();
+            }, 0);
+        });
     });
 })();
