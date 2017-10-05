@@ -28,9 +28,9 @@ gulp.task('dist', (cb) => {
 
     pump([
         b.transform(babelify, {
-            presets: ['es2015']
+            presets: ['es2015-node']
         }).bundle(),
-        source('request-es6.js'),
+        source('request.js'),
         buffer(),
         uglify(),
         gulp.dest(distBuild)
@@ -45,18 +45,18 @@ gulp.task('debug', (cb) => {
 
     pump([
         b.transform(babelify, {
-            presets: ['es2015']
+            presets: ['es2015-node']
         }).bundle(),
-        source('request-es6.js'),
+        source('request.js'),
         buffer(),
         sourcemaps.init({
             loadMaps: true,
             debug: true
         }),
-        uglify({
-            mangle: false,
-            preserveComments: 'all'
-        }),
+        // uglify({
+        //     mangle: false,
+        //     preserveComments: 'all'
+        // }),
         sourcemaps.write(),
         gulp.dest(debugBuild)
     ], cb);
@@ -72,7 +72,7 @@ gulp.task('build-tests', (cb) => {
     });
 
     pump([b.transform(babelify, {
-            presets: ['es2015']
+            presets: ['es2015-node']
         })
         .bundle(),
         source('tests.js'),
@@ -88,7 +88,7 @@ gulp.task('build-success-tests', (cb) => {
     });
 
     pump([b.transform(babelify, {
-            presets: ['es2015']
+            presets: ['es2015-node']
         })
         .bundle(),
         source('success.js'),
@@ -104,7 +104,7 @@ gulp.task('build-fail-tests', (cb) => {
     });
 
     pump([b.transform(babelify, {
-            presets: ['es2015']
+            presets: ['es2015-node']
         })
         .bundle(),
         source('fail.js'),
@@ -120,7 +120,7 @@ gulp.task('build-object-tests', (cb) => {
     });
 
     pump([b.transform(babelify, {
-            presets: ['es2015']
+            presets: ['es2015-node']
         })
         .bundle(),
         source('object.js'),
@@ -136,7 +136,7 @@ gulp.task('build-common-tests', (cb) => {
     });
 
     pump([b.transform(babelify, {
-            presets: ['es2015']
+            presets: ['es2015-node']
         })
         .bundle(),
         source('common.js'),

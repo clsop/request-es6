@@ -7,6 +7,8 @@ import FailResponse from './FailResponse';
 import HttpRequestError from './exceptions/HttpRequestError';
 import InvalidFunctionError from './exceptions/InvalidFunctionError';
 
+import Config from './Config';
+
 const eventHook = (promiseType, resolver) => {
     return e => {
         let xhr = e.target;
@@ -23,6 +25,8 @@ const validUrl = (url) => {
 export class HttpRequest {
     constructor(url = null, eagerness, useCredentials = false, username = null, password = null) {
         let xhr = new XMLHttpRequest();
+
+        Config();
 
         this.url = url;
         this.useCredentials = useCredentials;
@@ -136,7 +140,33 @@ if (global.window) {
     Object.defineProperties(descriptor, {
         value: {
             value: HttpRequest
+        },
+        configurable: {
+            value: false
+        },
+        enumerable: {
+            value: false
+        },
+        writable: {
+            value: false
         }
     });
-    Object.defineProperty(window, 'HttpRequest', descriptor);
+    let cfgDescriptor = Object.create(null);
+    Object.defineProperties(cfgDescriptor, {
+        value: {
+            value: Config
+        },
+        configurable: {
+            value: false
+        },
+        enumerable: {
+            value: false
+        },
+        writable: {
+            value: false
+        }
+    });
+
+    Object.defineProperty(HttpRequest, 'config', cfgDescriptor);
+    Object.defineProperty(window, 'Request', descriptor);
 }
