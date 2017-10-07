@@ -3,12 +3,13 @@ import _config from './vars/config';
 export default (options) => {
 	// TODO: dont overwrite
 	// defaults
+    // $deferred, promise, reactive observable// 
 	Object.defineProperty(_config, 'handling', {
     	value: 'promise',
     	configurable: true,
     	enumerable: true,
     	writable: true
-    }); // $deferred, promise, reactive observable
+    });
 
 	if (options === undefined || typeof options !== 'object') {
         return;
@@ -24,4 +25,4 @@ export default (options) => {
     	let optionName = optionNames[index];
     	_config[optionName] = options[optionName];
     }
-}
+};

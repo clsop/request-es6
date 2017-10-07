@@ -8,7 +8,7 @@ const sourcemaps = require('gulp-sourcemaps');
 const pump = require('pump');
 const mocha = require('gulp-mocha');
 
-const reporter = 'nyan';
+const reporter = 'spec';
 const bailOnFirstFail = false;
 
 const distBuild = 'build/dist';
@@ -28,11 +28,13 @@ gulp.task('dist', (cb) => {
 
     pump([
         b.transform(babelify, {
-            presets: ['es2015-node']
+            presets: ['es2015']
         }).bundle(),
         source('request.js'),
         buffer(),
-        uglify(),
+        uglify({
+            mangle: true
+        }),
         gulp.dest(distBuild)
     ], cb);
 });
@@ -45,7 +47,7 @@ gulp.task('debug', (cb) => {
 
     pump([
         b.transform(babelify, {
-            presets: ['es2015-node']
+            presets: ['es2015']
         }).bundle(),
         source('request.js'),
         buffer(),
@@ -53,10 +55,6 @@ gulp.task('debug', (cb) => {
             loadMaps: true,
             debug: true
         }),
-        // uglify({
-        //     mangle: false,
-        //     preserveComments: 'all'
-        // }),
         sourcemaps.write(),
         gulp.dest(debugBuild)
     ], cb);

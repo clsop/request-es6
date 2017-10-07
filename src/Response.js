@@ -3,7 +3,7 @@
 export default class Reponse {
 	constructor(status = null, statusText = '', responseType = '', responseText = '', responseData = null) {
 		if (status === null && !(typeof status === 'number')) {
-			throw new TypeError('status must be an unsigned short');
+			throw new TypeError('status must be a number');
 		}
 
 		this.status = status;

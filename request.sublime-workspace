@@ -340,6 +340,10 @@
 		"side_bar_visible": false,
 		"status_bar_visible": false
 	},
+	"expanded_folders":
+	[
+		"/extra/misc/Coding_Projects/js/request"
+	],
 	"file_history":
 	[
 		"/extra/misc/Coding_Projects/js/request/test/success.js",

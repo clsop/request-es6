@@ -64,8 +64,9 @@ export class HttpRequest {
                 this.xhr.timeout = 30000;
                 break;
             default:
+                // whenever
                 this.xhr.timeout = 0;
-                break; // whenever
+                break;
         }
     }
 
