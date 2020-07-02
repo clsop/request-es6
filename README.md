@@ -1,5 +1,5 @@
 # request-es6
-Simple class wrapper around XmlHttpRequest witten in es6 and transpiling to es5.
+Simple class wrapper around XmlHttpRequest witten in es6 with transpiling to es5.
 
 <pre>
 var request = new HttpRequest([url], [eagerness], [useCredentials], [username], [password]);

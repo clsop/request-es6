@@ -44,6 +44,6 @@ export default (() => {
             }, '{ "test": "test" }');
         });
 
-        //test('should use Content-Type to determine response type');
+        test('should use Content-Type to determine response type');
     });
 })();

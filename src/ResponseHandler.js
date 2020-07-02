@@ -40,6 +40,7 @@ export default class ResponseHandler {
     }
 
     getResponse(promiseType) {
+        /// TODO: Content handling
         //let contentType = this.xhr.getResponseHeader('Content-Type');
         let response = null;
         
