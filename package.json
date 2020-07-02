@@ -1,6 +1,6 @@
 {
-  "name": "request",
-  "description": "simple class wrapper around XmlHttpRequest, for async js request or Ajax",
+  "name": "request-es6",
+  "description": "simple class wrapper around XmlHttpRequest, for async js http requests",
   "dependencies": {
     "babel-preset-es2015": "^6.24.1",
     "babel-preset-es2015-node": "^6.1.1",
